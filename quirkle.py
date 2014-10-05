@@ -51,30 +51,54 @@ refillbag(player1bag)
 refillbag(player2bag)
 
 
-def processinput(userinput, bag):
+def is_input_allowed(userinput, bag):
   for piececommand in userinput.split(" "):
     components = piececommand.split(":")
     piecename = components[0]
     piececoords = components[1].split(',')
-    x = piececoords[0]
-    y = piececoords[1]
+    x = int(piececoords[0])
+    y = int(piececoords[1])
 
-    print(piecename+x+y)
+    if not (piecename in bag and Board[x,y] == '--' and 0 <= x < max and 0 <= y < max):
+      return False
+
+  return True
+
+def execute_moves(userinput, bag):
+  for piececommand in userinput.split(" "):
+    components = piececommand.split(":")
+    piecename = components[0]
+    piececoords = components[1].split(',')
+    x = int(piececoords[0])
+    y = int(piececoords[1])
+
+    bag.remove(piecename)
+    Board[x,y] = piecename
+
+
 
 
 
 player1next=True
 while not gameisfinished():
   if player1next:
-    print "player 1's turn"
+    print "player 1's turn, bag:"
     print player1bag
-    userinput = raw_input("please choose where to go (e.g. 'r1:30,40 r2:1,20'):")
-    processinput(userinput, player1bag)
+    userinput = raw_input("please choose where to go (e.g. 'r1:30,40 r2:1,20'): \n")
+    valid = is_input_allowed(userinput, player1bag)
+
+    while not valid:
+      print "Invalid input, please make sure you use allowed pieces and place them on the board"
+      userinput = raw_input("please choose where to go (e.g. 'r1:30,40 r2:1,20'): \n")
+      valid = is_input_allowed(userinput, player1bag)
+
+    execute_moves(userinput, player1bag)
+    refillbag(player1bag)
+    printboard()
+
   else:
     print "player 2's turn"
-    print player2bag
-    userinput = raw_input("please choose where to go (e.g. 'r1:30,40'):")
-    processinput(userinput, player1bag)
+    # TODO:
 
   player1next = not player1next
 
