@@ -11,8 +11,8 @@
 
 
 import random
-
 import sys
+from termcolor import cprint
 
 max_size = 20
 
@@ -36,7 +36,31 @@ player2bag = []
 def printboard():
   for y in range(0,max_size):
     for x in range(0,max_size):
-      sys.stdout.write(' '+Board[x,y])
+      bg = ''
+      color = ''
+      if Board[x,y][0] == "g":
+        bg = 'on_green'
+        color = 'grey'
+      if Board[x,y][0] == "b":
+        bg = 'on_cyan'
+        color = 'grey'
+      if Board[x,y][0] == "r":
+        bg = 'on_red'
+        color = 'grey'
+      if Board[x,y][0] == "o":
+        bg = 'on_cyan' #can't do orange in termbg
+        color = 'grey'
+      if Board[x,y][0] == "y":
+        bg = 'on_yellow'
+        color = 'grey'
+      if Board[x,y][0] == "p":
+        bg = 'on_magenta'
+        color = 'grey'
+      if empty_square(x,y):
+        bg = 'on_grey'
+        color = 'white'
+      
+      cprint(Board[x,y], color, bg, end=' ')
     sys.stdout.write("\n")
 
 
