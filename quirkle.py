@@ -114,6 +114,19 @@ def row(x,y,piecename):
     next_cell_right = next_cell_right+1
   return left_row+[piecename]+right_row
 
+def column(x,y,piecename):
+  pieces_above =[]
+  pieces_below = []
+  next_cell_above = y-1
+  next_cell_below = y+1
+  while not empty_square(x,next_cell_above):
+    pieces_above.insert(0,Board[x,next_cell_above])
+    next_cell_above = next_cell_above-1
+  while not empty_square(x,next_cell_below):
+    pieces_below.append(Board[x,next_cell_below])
+    next_cell_below = next_cell_below+1
+  return pieces_above+[piecename]+pieces_below
+
 
 # need to check two in any adjancent direction
 # def valid_line_of(x, y, piecename, testfunction):
@@ -195,6 +208,7 @@ def execute_move(piececommand, bag):
   x = int(piececoords[0])
   y = int(piececoords[1])
   print row(x,y,piecename)
+  print column(x,y,piecename)
   bag.remove(piecename)
   Board[x,y] = piecename
 
