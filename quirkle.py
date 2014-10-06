@@ -1,17 +1,25 @@
+# Useful stuff for lizzie!
+
+# To run this file, you'll need to the Terminal from the dock
+# If it isn't there already, type `cd quirkle` then hit enter
+# You can then run `python quirkle.py` to run it
+# If you want to stop running it, press `Ctrl-C` (not cmd)
+
+# Saving can be done with GitHub...
+# You can `commit` work whenever you like, and you can always get back to a commit
+# When you hit the `Sync` button, I can get your work on my computer too
+
+
 import random
 
 import sys
 
-max = 20
-
-print("welcome to Lizzie's Quirkle game!")
-
-
+max_size = 20
 
 # initialise stuff here
 Board = {}
-for y in range(0,max):
-  for x in range(0,max):
+for y in range(0,max_size):
+  for x in range(0,max_size):
     Board[x,y] = "--"
 
 colors = ['r','o','y','g','b','p']
@@ -21,14 +29,13 @@ distinct_pieces = [c+s for c in colors for s in shapes]
 
 bag_of_pieces = distinct_pieces*3
 random.shuffle(bag_of_pieces)
-print(bag_of_pieces)
 player1bag = []
 player2bag = []
 
 # print out the board state:
 def printboard():
-  for y in range(0,max):
-    for x in range(0,max):
+  for y in range(0,max_size):
+    for x in range(0,max_size):
       sys.stdout.write(' '+Board[x,y])
     sys.stdout.write("\n")
 
@@ -47,54 +54,164 @@ def refillbag(bag):
   for i in range(0,number_to_take):
     bag.append(bag_of_pieces.pop())
 
+
+def empty_square(x,y):
+  return Board[x,y] == '--'
+
+def in_bounds(x,y):
+  return 0 <= x < max_size and 0 <= y < max_size
+
+def has_adjacent(x,y):
+  return (
+            (in_bounds(x+1,y) and not empty_square(x+1,y)) or
+            (in_bounds(x,y+1) and not empty_square(x,y+1)) or
+            (in_bounds(x-1,y) and not empty_square(x-1,y)) or
+            (in_bounds(x,y-1) and not empty_square(x,y-1))
+         )
+
+def same_shape(piece1, piece2):
+  return piece1[1] == piece2[1]
+
+def same_color(piece1, piece2):
+  return piece1[0] == piece2[0]
+
+
+# need to check two in any adjancent direction
+# def valid_line_of(x, y, piecename, testfunction):
+
+#   if in_bounds(x,y+1) and not empty_square(x,y+1) and not testfunction(piecename, Board[x,y+1]):
+#     if not(in_bounds(x,y+2) and not empty_square(x,y+2) and not testfunction(piecename, Board[x,y+2])):
+#       return False
+
+#   print 'aaaa'
+#   if in_bounds(x,y-1) and not empty_square(x,y-1) and not testfunction(piecename, Board[x,y-1]):
+#     print 'bbbb'
+#     if not(in_bounds(x,y-2) and not empty_square(x,y-2) and not testfunction(piecename, Board[x,y-2])):
+#       print 'cccc'
+#       return False
+
+#   return True
+
+
+
+# TODO: this function doesn't work
+def row_of(x,y,piecename,testfunction):
+  if in_bounds(x+1,y) and not empty_square(x+1,y) and testfunction(piecename, Board[x+1,y]):
+    if not (in_bounds(x+2,y) and not empty_square(x+2,y) and testfunction(piecename, Board[x+2,y])):
+      return False
+
+  if in_bounds(x-1,y) and not empty_square(x-1,y) and testfunction(piecename, Board[x-1,y]):
+    if not (in_bounds(x-2,y) and not empty_square(x-2,y) and testfunction(piecename, Board[x-2,y])):
+      return False
+  return True
+
+# TODO: this function doesn't work
+def column_of(x,y,piecename,testfunction):
+  if in_bounds(x,y+1) and not empty_square(x,y+1) and testfunction(piecename, Board[x,y+1]):
+    if not (in_bounds(x,y+2) and not empty_square(x,y+2) and testfunction(piecename, Board[x,y+2])):
+      return False
+
+  if in_bounds(x,y-1) and not empty_square(x,y-1) and testfunction(piecename, Board[x,y-1]):
+    if not (in_bounds(x,y-2) and not empty_square(x,y-2) and testfunction(piecename, Board[x,y-2])):
+      return False
+  return True
+
+
+
+def get_error_message(piececommand, bag):
+  components = piececommand.split(":")
+  if len(components) != 2:
+    return "Move should look like this p1:1,2"
+
+  piecename = components[0]
+  piececoords = components[1].split(',')
+  x = int(piececoords[0])
+  y = int(piececoords[1])
+
+  if not piecename in bag:
+    return "you don't have this piece in your bag DUH!"
+
+  if not in_bounds(x,y):
+    return "You must place your piece on the board"
+
+  if not empty_square(x,y):
+    return "You can't place a piece on top of another"
+
+  if not has_adjacent(x,y):
+    return "You must place your piece next to an existing piece"
+
+  if not (row_of(x,y,piecename,same_shape) or row_of(x,y,piecename,same_color)):
+    return "You must place your piece to make a row of the same shape or color"
+
+  if not (column_of(x,y,piecename,same_shape) or column_of(x,y,piecename,same_color)):
+    return "You must place your piece to make a column of the same shape or color"
+
+  return ""
+
+
+def execute_move(piececommand, bag):
+  components = piececommand.split(":")
+  piecename = components[0]
+  piececoords = components[1].split(',')
+  x = int(piececoords[0])
+  y = int(piececoords[1])
+
+  bag.remove(piecename)
+  Board[x,y] = piecename
+
+
+
+print("welcome to Lizzie's Quirkle game!")
+
 refillbag(player1bag)
 refillbag(player2bag)
 
+printboard()
 
-def is_input_allowed(userinput, bag):
-  for piececommand in userinput.split(" "):
-    components = piececommand.split(":")
-    piecename = components[0]
-    piececoords = components[1].split(',')
-    x = int(piececoords[0])
-    y = int(piececoords[1])
+piecename = raw_input("please choose the first piece from your bag " + ','.join(player1bag) + ":\n")
+while not piecename in player1bag:
+  piecename = raw_input("please choose the first piece from your bag " + ','.join(player1bag) + ":\n")
+player1bag.remove(piecename)
+Board[max_size/2,max_size/2] = piecename
+printboard()
 
-    if not (piecename in bag and Board[x,y] == '--' and 0 <= x < max and 0 <= y < max):
-      return False
+while len(player1bag) > 0:
+  userinput = raw_input("place another a piece from your bag " + ','.join(player1bag) + " (or hit enter to finish your turn):\n")
+  if userinput == "":
+    break
+  while get_error_message(userinput, player1bag) != "":
+    userinput = raw_input("Invalid move: ["+get_error_message(userinput, player1bag)+"] please place a piece (or hit enter to finish your turn): \n")
+    if userinput == "":
+      break
+  execute_move(userinput, player1bag)
+  printboard()
 
-  return True
-
-def execute_moves(userinput, bag):
-  for piececommand in userinput.split(" "):
-    components = piececommand.split(":")
-    piecename = components[0]
-    piececoords = components[1].split(',')
-    x = int(piececoords[0])
-    y = int(piececoords[1])
-
-    bag.remove(piecename)
-    Board[x,y] = piecename
+refillbag(player1bag)
 
 
-
-
-
-player1next=True
+player1next=False
 while not gameisfinished():
   if player1next:
-    print "player 1's turn, bag:"
-    print player1bag
-    userinput = raw_input("please choose where to go (e.g. 'r1:30,40 r2:1,20'): \n")
-    valid = is_input_allowed(userinput, player1bag)
+    print "player 1's turn"
 
-    while not valid:
-      print "Invalid input, please make sure you use allowed pieces and place them on the board"
-      userinput = raw_input("please choose where to go (e.g. 'r1:30,40 r2:1,20'): \n")
-      valid = is_input_allowed(userinput, player1bag)
-
-    execute_moves(userinput, player1bag)
-    refillbag(player1bag)
+    userinput = raw_input("please place a piece from your bag " + ','.join(player1bag) + ":\n")
+    while get_error_message(userinput, player1bag) != "":
+      userinput = raw_input("Invalid move: ["+get_error_message(userinput, player1bag)+"] please place a piece: \n")
+    execute_move(userinput, player1bag)
     printboard()
+
+    while len(player1bag) > 0:
+      userinput = raw_input("place another a piece from your bag " + ','.join(player1bag) + " (or hit enter to finish your turn):\n")
+      if userinput == "":
+        break
+      while get_error_message(userinput, player1bag) != "":
+        userinput = raw_input("Invalid move: ["+get_error_message(userinput, player1bag)+"] please place a piece (or hit enter to finish your turn): \n")
+        if userinput == "":
+          break
+      execute_move(userinput, player1bag)
+      printboard()
+
+    refillbag(player1bag)
 
   else:
     print "player 2's turn"
