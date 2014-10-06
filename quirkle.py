@@ -137,7 +137,7 @@ def column(x,y,piecename):
 
 
 
-def get_error_message(piececommand, bag):
+def get_error_message(piececommand, bag, pieces_played_by_this_person):
   components = piececommand.split(":")
   if len(components) != 2:
     return "Move should look like this p1:1,2"
@@ -169,11 +169,11 @@ def get_error_message(piececommand, bag):
     return "You must place your piece to make a column of the same shape or color"
 
   is_in_row = len(current_row)>1
-  if is_in_row and piecename in current_row:
+  if is_in_row and current_row.count(piecename)>1:
     return "You must not place two identical pieces in one row"
 
   is_in_column = len(current_column)>1
-  if is_in_column and piecename in current_column:
+  if is_in_column and current_column.count(piecename)>1:
     return "You must not place two identical pieces in one column"
 
   return ""
@@ -185,11 +185,15 @@ def execute_move(piececommand, bag):
   piececoords = components[1].split(',')
   x = int(piececoords[0])
   y = int(piececoords[1])
-  print row(x,y,piecename)
-  print column(x,y,piecename)
   bag.remove(piecename)
   Board[x,y] = piecename
 
+def extractpiececoords(piececommand):
+  components = piececommand.split(":")
+  piececoords = components[1].split(',')
+  x = int(piececoords[0])
+  y = int(piececoords[1])
+  return (x,y)
 
 
 print("welcome to Lizzie's Quirkle game!")
@@ -206,15 +210,18 @@ player1bag.remove(piecename)
 Board[max_size/2,max_size/2] = piecename
 printboard()
 
+pieces_played_by_this_person = [(max_size/2,max_size/2)]
 while len(player1bag) > 0:
   userinput = raw_input("place another a piece from your bag " + ','.join(player1bag) + " (or hit enter to finish your turn):\n")
   if userinput == "":
     break
-  while get_error_message(userinput, player1bag) != "":
-    userinput = raw_input("Invalid move: ["+get_error_message(userinput, player1bag)+"] please place a piece (or hit enter to finish your turn): \n")
+  while get_error_message(userinput, player1bag, pieces_played_by_this_person) != "":
+    userinput = raw_input("Invalid move: ["+get_error_message(userinput, player1bag, pieces_played_by_this_person)+"] please place a piece (or hit enter to finish your turn): \n")
     if userinput == "":
       break
   execute_move(userinput, player1bag)
+  piececoords = extractpiececoords(userinput)
+  pieces_played_by_this_person.append(piececoords)
   printboard()
 
 refillbag(player1bag)
@@ -224,22 +231,27 @@ player1next=False
 while not gameisfinished():
   if player1next:
     print "player 1's turn"
+    pieces_played_by_this_person = []
 
     userinput = raw_input("please place a piece from your bag " + ','.join(player1bag) + ":\n")
-    while get_error_message(userinput, player1bag) != "":
-      userinput = raw_input("Invalid move: ["+get_error_message(userinput, player1bag)+"] please place a piece: \n")
+    while get_error_message(userinput, player1bag, pieces_played_by_this_person) != "":
+      userinput = raw_input("Invalid move: ["+get_error_message(userinput, player1bag, pieces_played_by_this_person)+"] please place a piece: \n")
     execute_move(userinput, player1bag)
+    piececoords = extractpiececoords(userinput)
+    pieces_played_by_this_person.append(piececoords)
     printboard()
 
     while len(player1bag) > 0:
       userinput = raw_input("place another a piece from your bag " + ','.join(player1bag) + " (or hit enter to finish your turn):\n")
       if userinput == "":
         break
-      while get_error_message(userinput, player1bag) != "":
-        userinput = raw_input("Invalid move: ["+get_error_message(userinput, player1bag)+"] please place a piece (or hit enter to finish your turn): \n")
+      while get_error_message(userinput, player1bag, pieces_played_by_this_person) != "":
+        userinput = raw_input("Invalid move: ["+get_error_message(userinput, player1bag, pieces_played_by_this_person)+"] please place a piece (or hit enter to finish your turn): \n")
         if userinput == "":
           break
       execute_move(userinput, player1bag)
+      piececoords = extractpiececoords(userinput)
+      pieces_played_by_this_person.append(piececoords)
       printboard()
 
     refillbag(player1bag)
