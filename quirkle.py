@@ -49,7 +49,7 @@ def printboard():
         color = 'grey'
       if Board[x,y][0] == "o":
         bg = 'on_cyan' #can't do orange in termbg
-        color = 'grey'
+        color = 'yellow'
       if Board[x,y][0] == "y":
         bg = 'on_yellow'
         color = 'grey'
@@ -98,6 +98,21 @@ def same_shape(piece1, piece2):
 
 def same_color(piece1, piece2):
   return piece1[0] == piece2[0]
+
+
+
+def row(x,y,piecename):
+  left_row = []
+  next_cell_left = x-1
+  while not empty_square(next_cell_left,y):
+    left_row.insert(0,Board[next_cell_left,y])
+    next_cell_left = next_cell_left-1
+  right_row = []
+  next_cell_right = x+1
+  while not empty_square(next_cell_right,y):
+    right_row.append(Board[next_cell_right,y])
+    next_cell_right = next_cell_right+1
+  return left_row+[piecename]+right_row
 
 
 # need to check two in any adjancent direction
@@ -179,7 +194,7 @@ def execute_move(piececommand, bag):
   piececoords = components[1].split(',')
   x = int(piececoords[0])
   y = int(piececoords[1])
-
+  print row(x,y,piecename)
   bag.remove(piecename)
   Board[x,y] = piecename
 
