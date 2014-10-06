@@ -93,12 +93,20 @@ def has_adjacent(x,y):
             (in_bounds(x,y-1) and not empty_square(x,y-1))
          )
 
-def same_shape(piece1, piece2):
-  return piece1[1] == piece2[1]
 
-def same_color(piece1, piece2):
-  return piece1[0] == piece2[0]
+def list_of_same_shape(pieces):
+  first_shape = pieces[0][1]
+  for piece in pieces:
+    if piece[1] != first_shape:
+      return False
+  return True
 
+def list_of_same_color(pieces):
+  first_color = pieces[0][0]
+  for piece in pieces:
+    if piece[0] != first_color:
+      return False
+  return True
 
 
 def row(x,y,piecename):
@@ -128,47 +136,6 @@ def column(x,y,piecename):
   return pieces_above+[piecename]+pieces_below
 
 
-# need to check two in any adjancent direction
-# def valid_line_of(x, y, piecename, testfunction):
-
-#   if in_bounds(x,y+1) and not empty_square(x,y+1) and not testfunction(piecename, Board[x,y+1]):
-#     if not(in_bounds(x,y+2) and not empty_square(x,y+2) and not testfunction(piecename, Board[x,y+2])):
-#       return False
-
-#   print 'aaaa'
-#   if in_bounds(x,y-1) and not empty_square(x,y-1) and not testfunction(piecename, Board[x,y-1]):
-#     print 'bbbb'
-#     if not(in_bounds(x,y-2) and not empty_square(x,y-2) and not testfunction(piecename, Board[x,y-2])):
-#       print 'cccc'
-#       return False
-
-#   return True
-
-
-
-# TODO: this function doesn't work
-def row_of(x,y,piecename,testfunction):
-  if in_bounds(x+1,y) and not empty_square(x+1,y) and testfunction(piecename, Board[x+1,y]):
-    if not (in_bounds(x+2,y) and not empty_square(x+2,y) and testfunction(piecename, Board[x+2,y])):
-      return False
-
-  if in_bounds(x-1,y) and not empty_square(x-1,y) and testfunction(piecename, Board[x-1,y]):
-    if not (in_bounds(x-2,y) and not empty_square(x-2,y) and testfunction(piecename, Board[x-2,y])):
-      return False
-  return True
-
-# TODO: this function doesn't work
-def column_of(x,y,piecename,testfunction):
-  if in_bounds(x,y+1) and not empty_square(x,y+1) and testfunction(piecename, Board[x,y+1]):
-    if not (in_bounds(x,y+2) and not empty_square(x,y+2) and testfunction(piecename, Board[x,y+2])):
-      return False
-
-  if in_bounds(x,y-1) and not empty_square(x,y-1) and testfunction(piecename, Board[x,y-1]):
-    if not (in_bounds(x,y-2) and not empty_square(x,y-2) and testfunction(piecename, Board[x,y-2])):
-      return False
-  return True
-
-
 
 def get_error_message(piececommand, bag):
   components = piececommand.split(":")
@@ -192,10 +159,10 @@ def get_error_message(piececommand, bag):
   if not has_adjacent(x,y):
     return "You must place your piece next to an existing piece"
 
-  if not (row_of(x,y,piecename,same_shape) or row_of(x,y,piecename,same_color)):
+  if not (list_of_same_shape(row(x,y,piecename)) or list_of_same_color(row(x,y,piecename))):
     return "You must place your piece to make a row of the same shape or color"
 
-  if not (column_of(x,y,piecename,same_shape) or column_of(x,y,piecename,same_color)):
+  if not (list_of_same_shape(column(x,y,piecename)) or list_of_same_color(column(x,y,piecename))):
     return "You must place your piece to make a column of the same shape or color"
 
   return ""
