@@ -159,11 +159,22 @@ def get_error_message(piececommand, bag):
   if not has_adjacent(x,y):
     return "You must place your piece next to an existing piece"
 
-  if not (list_of_same_shape(row(x,y,piecename)) or list_of_same_color(row(x,y,piecename))):
+  current_row = row(x,y,piecename)
+  current_column = column(x,y,piecename)
+
+  if not (list_of_same_shape(current_row) or list_of_same_color(current_row)):
     return "You must place your piece to make a row of the same shape or color"
 
-  if not (list_of_same_shape(column(x,y,piecename)) or list_of_same_color(column(x,y,piecename))):
+  if not (list_of_same_shape(current_column) or list_of_same_color(current_column)):
     return "You must place your piece to make a column of the same shape or color"
+
+  is_in_row = len(current_row)>1
+  if is_in_row and piecename in current_row:
+    return "You must not place two identical pieces in one row"
+
+  is_in_column = len(current_column)>1
+  if is_in_column and piecename in current_column:
+    return "You must not place two identical pieces in one column"
 
   return ""
 
